@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE validators PUBLIC "-//OpenSymphony Group//XWork Validator 1.0.3//EN"  
+"http://struts.apache.org/dtds/xwork-validator-1.0.3.dtd">
+<validators>
+	<field name="name">
+		<!-- 验证字符串不能为空 -->
+		<field-validator type="requiredstring">
+			<!-- 去空格 -->
+			<param name="trim">true</param>
+			<!-- 错误提示信息 -->
+			<message>用户名不能为空</message>
+		</field-validator>
+
+		<!-- 验证字符串长度 -->
+		<field-validator type="stringlength">
+			<param name="trim">true</param>
+			<param name="minLength">2</param>
+			<param name="maxLength">20</param>
+			<message>用户名长度应在2到18个字符间</message>
+		</field-validator>
+
+	</field>
+
+	<field name="password">
+		<field-validator type="requiredstring">
+			<param name="trim">true</param>
+			<message>密码不能为空</message>
+		</field-validator>
+
+		<field-validator type="stringlength">
+			<param name="minLength">6</param>
+			<param name="maxLength">18</param>
+			<message>密码长度应在6到18个字符之间</message>
+		</field-validator>
+	</field>
+
+	<field name="password2">
+		<field-validator type="requiredstring">
+			<param name="trim">true</param>
+			<message>重复密码不能为空</message>
+		</field-validator>
+
+		<field-validator type="fieldexpression">
+			<param name="expression"><![CDATA[password.equals(password2)]]></param>
+			<message>两次密码输入不一致</message>
+		</field-validator>
+	</field>
+
+
+	<field name="email">
+		<field-validator type="requiredstring">
+			<param name="trim">true</param>
+			<message>邮箱不能为空</message>
+		</field-validator>
+		<field-validator type="email">
+			<param name="trim">true</param>
+			<message>e-mail error</message>
+		</field-validator>
+	</field>
+
+
+	<!-- 验证字符串为日期类型 <field name="info.rdate"> <field-validator type="date"> 
+		<param name="min">1900-01-01</param> <param name="max">2008-10-16</param> 
+		<message>出生日期应在1900-01-01到2008-10-16</message> </field-validator> </field> -->
+</validators>

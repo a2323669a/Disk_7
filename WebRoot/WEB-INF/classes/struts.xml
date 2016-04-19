@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+
+	<constant name="struts.enable.DynamicMethodInvocation" value="false" />
+	<constant name="struts.devMode" value="true" />
+	<constant name="struts.ognl.allowStaticMethodAccess" value="true"></constant>
+	<constant name="struts.objectFactory.spring.autoWire.alwaysRespect"
+		value="false"></constant>
+	<constant name="struts.custom.i18n.resources" value="error" />
+	<!-- 最大上传容量10000MB -->
+	<constant name="struts.multipart.maxSize" value="10485760000" />
+
+	<package name="interceptor" extends="struts-default">
+		<interceptors>
+			<!-- 在package中配置 注意，login不需要定义此拦截器,定义权限控制拦截器 -->
+			<interceptor name="authority" class="com.intercpter.LoginIntercpter" />
+
+			<!-- 定义含“权限检查拦截器”的拦截器栈，注意缺省的拦截器栈“defaultStack”要放在前面 -->
+			<interceptor-stack name="authorityStack">
+				<interceptor-ref name="defaultStack"></interceptor-ref>
+				<interceptor-ref name="authority"></interceptor-ref>
+			</interceptor-stack>
+		</interceptors>
+
+
+		<default-interceptor-ref name="authorityStack"></default-interceptor-ref>
+
+		<!-- 定义全局处理结果 未登录转到此页 -->
+		<global-results>
+			<!-- 逻辑名为login的结果，映射到/login.jsp页面 -->
+			<result name="noLogin">/Register.jsp</result>
+		</global-results>
+	</package>
+
+	<package name="start" extends="struts-default">
+		<action name="register" class="com.action.RegisterAction">
+			<result name="success">/Register.jsp</result>
+			<result name="input">/Register.jsp</result>
+			<param name="path">d:/temp/</param>
+		</action>
+
+		<action name="login" class="com.action.LoginAction">
+			<result name="success" type="chain">
+				<param name="actionName">index</param>
+				<param name="id">${dir.id}</param>
+			</result>
+			<result name="input">/Register.jsp</result>
+		</action>
+	</package>
+
+	<package name="front" extends="interceptor">
+
+		<action name="index" class="com.action.IndexAction">
+			<result name="success">/index.jsp</result>
+			<result name="input">/Register.jsp</result>
+			<result name="error">/Register.jsp</result>
+		</action>
+
+		<action name="fileUpload" class="com.action.FileUploadAction">
+			<result name="success" type="redirectAction">
+				<param name="actionName">index</param>
+				<param name="id">${info.did}</param>
+				<param name="result">${result}</param>
+			</result>
+			<result name="error" type="chain">index</result>
+			<result name="input" type="chain">index</result>
+			<interceptor-ref name="defaultStack">
+				<!-- 最大上传容量100MB -->
+				<param name="fileUpload.maximumSize ">1048576000</param>
+			</interceptor-ref>
+		</action>
+
+		<action name="download" class="com.action.DownloadAction">
+			<result name="success" type="chain">index</result>
+		</action>
+
+		<action name="outlineDowload" class="com.action.OutlineDownloadAction">
+			<result name="success" type="chain">
+				<param name="actionName">task</param>
+				<param name="did">${did}</param>
+				<param name="start">0</param>
+				<param name="result">${result}</param>
+			</result>
+			<param name="aria2Path">E:\html\aria2-1.21.0-win-64bit-build1\</param>
+		</action>
+
+		<action name="task" class="com.action.TaskAction">
+			<result name="success">OutlineDowload.jsp</result>
+		</action>
+
+		<action name="folder" class="com.action.FolderAction">
+			<result name="success" type="redirectAction">
+				<param name="actionName">index</param>
+				<param name="id">${info.DirectoryId}</param>
+				<param name="result">${result}</param>
+			</result>
+			<result name="input">Folder.jsp</result>
+		</action>
+
+		<action name="delete" class="com.action.DeleteAction">
+			<result name="success" type="redirectAction">
+				<param name="actionName">index</param>
+				<param name="id">${pid}</param>
+				<param name="result">${result}</param>
+			</result>
+			<result name="input">Folder.jsp</result>
+		</action>
+
+		<action name="deal" class="com.action.DealAction">
+			<result name="video">Deal.jsp</result>
+			<param name="outputPath">E:\tomcat8.0\webapps\Disk_8</param>
+			<param name="path">db/</param>
+			<param name="ffmpeg">d:/temp/ffmpeg/</param>
+		</action>
+
+	</package>
+
+	<package name="upload" extends="json-default">
+		<!-- 查询上传进度 -->
+		<action name="progress" class="com.action.upload.FileProgressAction">
+			<result name="success" type="json"></result>
+		</action>
+	</package>
+	<!-- 重新指定request封装类 -->
+	<bean type="org.apache.struts2.dispatcher.multipart.MultiPartRequest"
+		name="requestParser" class="com.action.upload.MyMultiPartRequest"
+		scope="default" optional="true" />
+	<constant name="struts.multipart.parser" value="requestParser" />
+
+</struts>
